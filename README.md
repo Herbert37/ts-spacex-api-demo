@@ -2,7 +2,9 @@
 
 Dashboard comparativo de misiones de SpaceX para observar, en una interfaz real, las diferencias entre una API REST/OpenAPI y una API GraphQL. La aplicación mide en el navegador la latencia y el tamaño aproximado del payload de cada consulta, y muestra las misiones recibidas en tarjetas responsive.
 
-> **Nota:** las APIs públicas de SpaceX son servicios de terceros. Si una API no responde, la aplicación muestra un estado de error explícito y permite reintentar; no sustituye la respuesta real con datos inventados.
+## Demo en vivo
+
+Consulta la aplicación desplegada en Vercel: [spacex-api-performance.vercel.app](https://spacex-api-performance.vercel.app/)
 
 ## Arquitectura y stack
 
@@ -135,19 +137,19 @@ El runner no cuenta solicitudes fallidas dentro del promedio de payload. Si toda
 
 La siguiente ejecución se realizó con **20 usuarios virtuales durante 30 segundos**, utilizando la red móvil y los endpoints del Postman Mock Server:
 
-| Métrica | REST | GraphQL |
-|---|---:|---:|
-| Solicitudes totales | 3.380 | 3.380 |
-| Solicitudes exitosas | 60 | 60 |
-| Errores HTTP 429 | 3.320 | 3.320 |
-| Latencia promedio observada | 512 ms | 529 ms |
-| Latencia p95 observada | 920 ms | 1.006 ms |
-| Payload promedio | 2,22 KB | 0,35 KB |
-| Ahorro de payload GraphQL | — | **84,23 %** |
+| Métrica                     |    REST |     GraphQL |
+| --------------------------- | ------: | ----------: |
+| Solicitudes totales         |   3.380 |       3.380 |
+| Solicitudes exitosas        |      60 |          60 |
+| Errores HTTP 429            |   3.320 |       3.320 |
+| Latencia promedio observada |  512 ms |      529 ms |
+| Latencia p95 observada      |  920 ms |    1.006 ms |
+| Payload promedio            | 2,22 KB |     0,35 KB |
+| Ahorro de payload GraphQL   |       — | **84,23 %** |
 
 ### 1. Optimización y ahorro de ancho de banda
 
-GraphQL redujo el payload promedio de **2,22 KB en REST a 0,35 KB**, lo que representa un ahorro estimado de **84,23 %**. El resultado demuestra el beneficio de solicitar únicamente los campos necesarios para la interfaz (`mission_name`, `launch_date_utc`, `rocket` y `details`), evitando el *over-fetching* de la respuesta REST completa.
+GraphQL redujo el payload promedio de **2,22 KB en REST a 0,35 KB**, lo que representa un ahorro estimado de **84,23 %**. El resultado demuestra el beneficio de solicitar únicamente los campos necesarios para la interfaz (`mission_name`, `launch_date_utc`, `rocket` y `details`), evitando el _over-fetching_ de la respuesta REST completa.
 
 Esta reducción es especialmente relevante en redes con restricciones de ancho de banda o dispositivos móviles. La respuesta REST incluye estructuras y metadatos que esta pantalla no renderiza, como información ampliada de cohetes, barcos, paracaídas, fallos y enlaces.
 
@@ -155,7 +157,7 @@ Esta reducción es especialmente relevante en redes con restricciones de ancho d
 
 La prueba generó **3.380 solicitudes por tecnología**. Solo **60 fueron exitosas** y **3.320 recibieron HTTP 429 (`Too Many Requests`)**.
 
-El código 429 indica que el Postman Mock Server aplicó *rate limiting*. Al ejecutar 20 usuarios virtuales en un bucle cerrado, el servicio gratuito interpretó el tráfico como un pico de solicitudes y bloqueó temporalmente las peticiones excedentes. Por lo tanto, estos errores describen una limitación de la infraestructura simulada, no un fallo del contrato REST o GraphQL.
+El código 429 indica que el Postman Mock Server aplicó _rate limiting_. Al ejecutar 20 usuarios virtuales en un bucle cerrado, el servicio gratuito interpretó el tráfico como un pico de solicitudes y bloqueó temporalmente las peticiones excedentes. Por lo tanto, estos errores describen una limitación de la infraestructura simulada, no un fallo del contrato REST o GraphQL.
 
 Las solicitudes procesadas mostraron latencias promedio cercanas a **512–529 ms** y p95 entre **920 y 1.006 ms**. Son valores útiles para observar el comportamiento del mock en la nube bajo concurrencia, pero no deben tratarse como una medición definitiva de rendimiento en producción.
 
